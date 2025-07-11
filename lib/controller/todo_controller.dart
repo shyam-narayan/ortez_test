@@ -23,11 +23,9 @@ class TodoController extends GetxController {
     try {
       final fetched = await _apiService.fetchTodos();
       todos.assignAll(fetched);
-      // Save to Hive
       await box.clear();
       await box.addAll(fetched);
     } catch (e) {
-      // Load from Hive if available
       final localTodos = box.values.toList();
       if (localTodos.isNotEmpty) {
         todos.assignAll(localTodos);
@@ -42,12 +40,11 @@ class TodoController extends GetxController {
     try {
       final newTodo = await _apiService.addTodoToApi(todo);
       todos.insert(0, newTodo);
-      // Save to Hive
       final box = Hive.box<Todo>('todos');
       await box.clear();
       await box.addAll(todos);
     } catch (e) {
-      // Optionally handle error (e.g., show snackbar)
+      log(e.toString());
     }
   }
 
@@ -58,13 +55,12 @@ class TodoController extends GetxController {
       if (index != -1) {
         todos[index] = updated;
         todos.refresh();
-        // Save to Hive
         final box = Hive.box<Todo>('todos');
         await box.clear();
         await box.addAll(todos);
       }
     } catch (e) {
-      // Optionally handle error (e.g., show snackbar)
+      log(e.toString());
     }
   }
 
@@ -74,11 +70,9 @@ class TodoController extends GetxController {
     try {
       final fetched = await _apiService.fetchTodosByUserId(userId);
       todos.assignAll(fetched);
-      // Optionally, save to Hive if you want to cache per-user
       await box.clear();
       await box.addAll(fetched);
     } catch (e) {
-      // Load from Hive if available
       final localTodos = box.values.toList();
       if (localTodos.isNotEmpty) {
         todos.assignAll(localTodos);

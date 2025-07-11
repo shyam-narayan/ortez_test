@@ -8,7 +8,8 @@ import '../models/todo.dart';
 import 'add_edit_todo_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
-import 'dart:developer';
+import 'package:flutter/material.dart';
+import 'info_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -93,6 +94,15 @@ class _HomeScreenState extends State<HomeScreen>
           IconButton(
             icon: Icon(_showSearchBar ? Icons.close : Icons.search, size: 28),
             onPressed: _toggleSearchBar,
+          ),
+          IconButton(
+            icon: const Icon(Icons.info_outline, size: 24),
+            tooltip: 'App Info',
+            onPressed: () {
+              Navigator.of(
+                context,
+              ).push(MaterialPageRoute(builder: (_) => const InfoScreen()));
+            },
           ),
         ],
         centerTitle: false,
@@ -180,10 +190,31 @@ class _HomeScreenState extends State<HomeScreen>
                             filled: true,
                             fillColor: const Color(0xFF181818),
                           ),
-                          onChanged: (value) {
-                            setState(() {
-                              _userIdQuery = value;
-                            });
+                          onChanged: (value) async {
+                            final userId = int.tryParse(value);
+                            if (userId != null) {
+                              final connectivityResult = await Connectivity()
+                                  .checkConnectivity();
+                              if (connectivityResult ==
+                                  ConnectivityResult.none) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text(
+                                      'No internet connection. Please try again when online.',
+                                    ),
+                                  ),
+                                );
+                              } else {
+                                controller.fetchTodosForUser(userId);
+                              }
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('User ID must be a number.'),
+                                ),
+                              );
+                              controller.fetchTodos();
+                            }
                           },
                           onSubmitted: (value) async {
                             final userId = int.tryParse(value);
@@ -203,7 +234,11 @@ class _HomeScreenState extends State<HomeScreen>
                                 controller.fetchTodosForUser(userId);
                               }
                             } else {
-                              // Optionally show error
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('User ID must be a number.'),
+                                ),
+                              );
                             }
                           },
                         ),
@@ -231,9 +266,7 @@ class _HomeScreenState extends State<HomeScreen>
                               } else {
                                 controller.fetchTodosForUser(userId);
                               }
-                            } else {
-                              // Optionally show error
-                            }
+                            } else {}
                           }
                         },
                       ),
@@ -305,9 +338,6 @@ class _HomeScreenState extends State<HomeScreen>
                                 completed: val ?? false,
                               );
                               controller.updateTodo(updatedTodo);
-                              log(
-                                'Toggled todo: Id: ${updatedTodo.id}, Completed: ${updatedTodo.completed}',
-                              );
                             },
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(6),

@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
@@ -49,7 +51,12 @@ class _AddEditTodoScreenState extends State<AddEditTodoScreen> {
           completed: _completed,
         );
         await controller.addTodo(newTodo);
-        log('Added todo: \nUserId: \\${newTodo.userId}, Title: \\${newTodo.todo}, Completed: \\${newTodo.completed}');
+        log(
+          'Added todo: \nUserId: \\${newTodo.userId}, Title: \\${newTodo.todo}, Completed: \\${newTodo.completed}',
+        );
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Todo added successfully!')),
+        );
       } else {
         final updatedTodo = Todo(
           userId: widget.todo!.userId,
@@ -58,9 +65,15 @@ class _AddEditTodoScreenState extends State<AddEditTodoScreen> {
           completed: _completed,
         );
         await controller.updateTodo(updatedTodo);
-        log('Updated todo: \nId: \\${updatedTodo.id}, UserId: \\${updatedTodo.userId}, Title: \\${updatedTodo.todo}, Completed: \\${updatedTodo.completed}');
+        log(
+          'Updated todo: \nId: \\${updatedTodo.id}, UserId: \\${updatedTodo.userId}, Title: \\${updatedTodo.todo}, Completed: \\${updatedTodo.completed}',
+        );
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Todo updated successfully!')),
+        );
       }
       Get.back();
+      FocusScope.of(context).unfocus();
     }
   }
 
@@ -93,57 +106,64 @@ class _AddEditTodoScreenState extends State<AddEditTodoScreen> {
         padding: const EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
-          child: Column(
-            children: [
-              if (widget.todo == null) ...[
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                if (widget.todo == null) ...[
+                  TextFormField(
+                    controller: _userIdController,
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(labelText: 'User ID'),
+                    validator: (val) {
+                      if (val == null || val.trim().isEmpty) {
+                        return 'User ID is required';
+                      }
+                      if (int.tryParse(val.trim()) == null) {
+                        return 'User ID must be a number';
+                      }
+                      return null;
+                    },
+                  ),
+                  SizedBox(height: 10),
+                ],
                 TextFormField(
-                  controller: _userIdController,
-                  keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(labelText: 'User ID'),
-                  validator: (val) {
-                    if (val == null || val.trim().isEmpty) {
-                      return 'User ID is required';
-                    }
-                    if (int.tryParse(val.trim()) == null) {
-                      return 'User ID must be a number';
-                    }
-                    return null;
-                  },
+                  initialValue: _title,
+                  decoration: const InputDecoration(labelText: 'Title'),
+                  validator: (val) =>
+                      val == null || val.isEmpty ? 'Title is required' : null,
+                  onSaved: (val) => _title = val ?? '',
                 ),
                 SizedBox(height: 10),
-              ],
-              TextFormField(
-                initialValue: _title,
-                decoration: const InputDecoration(labelText: 'Title'),
-                validator: (val) =>
-                    val == null || val.isEmpty ? 'Title is required' : null,
-                onSaved: (val) => _title = val ?? '',
-              ),
-              SizedBox(height: 10),
-              CheckboxListTile(
-                value: _completed,
-                onChanged: (val) => setState(() => _completed = val ?? false),
-                title: const Text('Completed'),
-              ),
-              const SizedBox(height: 20),
-              InkWell(
-                onTap: _save,
-                child: Container(
-                  height: MediaQuery.of(context).size.width * 0.1,
-                  width: double.maxFinite,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Center(
-                    child: const Text(
-                      'Save',
-                      style: TextStyle(color: Colors.black),
+                CheckboxListTile(
+                  value: _completed,
+                  onChanged: (val) => setState(() => _completed = val ?? false),
+                  title: const Text('Completed'),
+                ),
+                const SizedBox(height: 20),
+                InkWell(
+                  onTap: _save,
+                  child: Container(
+                    height:
+                        MediaQuery.of(context).orientation ==
+                            Orientation.landscape
+                        ? MediaQuery.of(context).size.height * 0.15
+                        : MediaQuery.of(context).size.width * 0.15,
+                    width: double.maxFinite,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Center(
+                      child: const Text(
+                        'Save',
+                        style: TextStyle(color: Colors.black),
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ],
+                const SizedBox(height: 20),
+              ],
+            ),
           ),
         ),
       ),

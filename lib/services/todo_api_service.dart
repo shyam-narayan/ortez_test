@@ -1,6 +1,4 @@
 import 'dart:convert';
-import 'dart:developer';
-import 'package:flutter/services.dart' show rootBundle;
 import 'package:http/http.dart' as http;
 import '../models/todo.dart';
 
@@ -11,10 +9,7 @@ class TodoApiService {
     // if (useDummyData) {
     //   return await _fetchTodosFromDummyData();
     // }
-    final response = await http.get(
-      Uri.parse(baseUrl),
-      // headers: {'User-Agent': 'Mozilla/5.0'},
-    );
+    final response = await http.get(Uri.parse(baseUrl));
     if (response.statusCode == 200) {
       final Map<String, dynamic> responseData = json.decode(response.body);
       final List<dynamic> data = responseData['todos'];
@@ -36,20 +31,6 @@ class TodoApiService {
   //   }
   // }
 
-  Future<Todo> fetchTodoById(int id) async {
-    // if (useDummyData) {
-    //   final todos = await _fetchTodosFromDummyData();
-    //   return todos.firstWhere((t) => t.id == id);
-    // }
-    final response = await http.get(Uri.parse('$baseUrl/$id'));
-    if (response.statusCode == 200) {
-      final data = json.decode(response.body);
-      return Todo.fromJson(data);
-    } else {
-      throw Exception('Failed to load todo');
-    }
-  }
-
   Future<List<Todo>> fetchTodosByUserId(int userId) async {
     final url = 'https://dummyjson.com/todos/user/$userId';
     final response = await http.get(Uri.parse(url));
@@ -60,12 +41,6 @@ class TodoApiService {
     } else {
       throw Exception('Failed to load todos for user $userId');
     }
-  }
-
-  // Mocked: does not persist
-  Future<Todo> updateTodo(Todo todo) async {
-    await Future.delayed(Duration(milliseconds: 500));
-    return todo;
   }
 
   Future<Todo> addTodoToApi(Todo todo) async {
@@ -81,7 +56,6 @@ class TodoApiService {
     );
     if (response.statusCode == 200 || response.statusCode == 201) {
       final data = jsonDecode(response.body);
-      log("added todo: ${data.toString()}");
       return Todo.fromJson(data);
     } else {
       throw Exception('Failed to add todo: \\${response.statusCode}');
@@ -101,7 +75,6 @@ class TodoApiService {
     );
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
-      log('Updated todo: \\n\\${data.toString()}');
       return Todo.fromJson(data);
     } else {
       throw Exception('Failed to update todo: \\${response.statusCode}');
