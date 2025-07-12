@@ -10,7 +10,7 @@ import '../controller/todo_controller.dart';
 
 class AddEditTodoScreen extends StatefulWidget {
   final Todo? todo;
-  const AddEditTodoScreen({Key? key, this.todo}) : super(key: key);
+  const AddEditTodoScreen({super.key, this.todo});
 
   @override
   State<AddEditTodoScreen> createState() => _AddEditTodoScreenState();
@@ -72,6 +72,7 @@ class _AddEditTodoScreenState extends State<AddEditTodoScreen> {
           const SnackBar(content: Text('Todo updated successfully!')),
         );
       }
+      FocusScope.of(context).unfocus();
       Get.back();
       FocusScope.of(context).unfocus();
     }

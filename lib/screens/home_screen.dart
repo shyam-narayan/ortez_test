@@ -1,4 +1,4 @@
-// ignore_for_file: deprecated_member_use
+// ignore_for_file: deprecated_member_use, use_build_context_synchronously
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -8,7 +8,6 @@ import '../models/todo.dart';
 import 'add_edit_todo_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:flutter/material.dart';
 import 'info_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -25,7 +24,6 @@ class _HomeScreenState extends State<HomeScreen>
   final TextEditingController _userIdController = TextEditingController();
   bool _showSearchBar = false;
   String _searchQuery = '';
-  String _userIdQuery = '';
   late AnimationController _animationController;
   late Animation<double> _searchBarAnimation;
 
@@ -128,7 +126,7 @@ class _HomeScreenState extends State<HomeScreen>
                     autofocus: false,
                     style: theme.textTheme.bodyLarge?.copyWith(
                       color: Colors.white,
-                      fontFamily: GoogleFonts.inter().fontFamily,
+                      fontFamily: GoogleFonts.overpassMono().fontFamily,
                       fontWeight: FontWeight.w500,
                       fontSize: 18,
                     ),
@@ -168,7 +166,7 @@ class _HomeScreenState extends State<HomeScreen>
                           keyboardType: TextInputType.number,
                           style: theme.textTheme.bodyLarge?.copyWith(
                             color: Colors.white,
-                            fontFamily: GoogleFonts.inter().fontFamily,
+                            fontFamily: GoogleFonts.overpassMono().fontFamily,
                             fontWeight: FontWeight.w500,
                             fontSize: 18,
                           ),
@@ -177,6 +175,7 @@ class _HomeScreenState extends State<HomeScreen>
                             hintStyle: theme.textTheme.bodySmall?.copyWith(
                               color: const Color(0xFFAAAAAA),
                             ),
+
                             border: InputBorder.none,
                             prefixIcon: Icon(
                               Icons.person,
@@ -191,6 +190,11 @@ class _HomeScreenState extends State<HomeScreen>
                             fillColor: const Color(0xFF181818),
                           ),
                           onChanged: (value) async {
+                            if (value.isEmpty) {
+                              controller.fetchTodos();
+                              return;
+                            }
+
                             final userId = int.tryParse(value);
                             if (userId != null) {
                               final connectivityResult = await Connectivity()
@@ -213,10 +217,14 @@ class _HomeScreenState extends State<HomeScreen>
                                   content: Text('User ID must be a number.'),
                                 ),
                               );
-                              controller.fetchTodos();
                             }
                           },
                           onSubmitted: (value) async {
+                            if (value.isEmpty) {
+                              controller.fetchTodos();
+                              return;
+                            }
+
                             final userId = int.tryParse(value);
                             if (userId != null) {
                               final connectivityResult = await Connectivity()
@@ -369,8 +377,8 @@ class _HomeScreenState extends State<HomeScreen>
         onPressed: () {
           Get.to(() => const AddEditTodoScreen());
         },
-        child: const Icon(Icons.add, size: 32),
         elevation: 0,
+        child: const Icon(Icons.add, size: 32),
       ),
     );
   }
